@@ -78,7 +78,9 @@ const clickCard = (event) => {
     } else {
       matches++;
       if (matches === 8) {
-        alert('CONGRATUATIONS YOU WON!');
+        setTimeout(() => {
+          alert('CONGRATUATIONS YOU WON!');
+        }, 300);
         resetGame();
       }
       firstPick = null;
