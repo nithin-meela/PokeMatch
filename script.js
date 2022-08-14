@@ -1,4 +1,5 @@
 const pokeAPIBaseUrl = 'https://pokeapi.co/api/v2/pokemon/';
+
 const colors = {
   fire: '#FDDFDF',
   grass: '#DEFDE0',
@@ -15,9 +16,13 @@ const colors = {
   fighting: '#E6E0D4',
   normal: '#F5F5F5',
 };
+
 const game = document.getElementById('game');
+
 let isPaused = false;
 let firstPick;
+let matches;
+
 const loadPokemon = async () => {
   const randomIds = new Set();
   while (randomIds.size < 8) {
@@ -47,7 +52,7 @@ const displayPokemon = (pokemon) => {
         `;
     })
     .join('');
-  console.log(pokemonHtml);
+  //   console.log(pokemonHtml);
   game.innerHTML = pokemonHtml;
 };
 
@@ -56,8 +61,7 @@ const clickCard = (event) => {
   const [front, back] = getFrontAndBack(pokemonCard);
   if (front.classList.contains('rotated') || isPaused) return;
   isPaused = true;
-  front.classList.toggle('rotated');
-  back.classList.toggle('rotated');
+  rotateElements([front, back]);
   if (!firstPick) {
     firstPick = pokemonCard;
     isPaused = false;
@@ -65,6 +69,20 @@ const clickCard = (event) => {
     const secondPokemonName = pokemonCard.dataset.pokename;
     const firstPokemonName = firstPick.dataset.pokename;
     if (firstPokemonName != secondPokemonName) {
+      const [fFront, fBack] = getFrontAndBack(firstPick);
+      setTimeout(() => {
+        rotateElements([front, back, fFront, fBack]);
+        firstPick = null;
+        isPaused = false;
+      }, 500);
+    } else {
+      matches++;
+      if (matches === 8) {
+        alert('CONGRATUATIONS YOU WON!');
+        resetGame();
+      }
+      firstPick = null;
+      isPaused = false;
     }
   }
 };
@@ -74,8 +92,24 @@ const getFrontAndBack = (card) => {
   const back = card.querySelector('.back');
   return [front, back];
 };
+
 const resetGame = async () => {
-  const pokemon = await loadPokemon();
-  displayPokemon([...pokemon, ...pokemon]);
+  game.innerHTML = '';
+  isPaused = true;
+  firstPick = null;
+  matches = 0;
+  setTimeout(async () => {
+    const loadedPokemon = await loadPokemon();
+    displayPokemon([...loadedPokemon, ...loadedPokemon]);
+    isPaused = false;
+  }, 200);
 };
+
+const rotateElements = (elements) => {
+  if (typeof elements != 'object' || !elements.length) return;
+  elements.forEach((element) => {
+    element.classList.toggle('rotated');
+  });
+};
+
 resetGame();
